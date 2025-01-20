@@ -13,6 +13,10 @@ jobs:
       # Step 1: Checkout the Repository
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22.5  
 
       # Step 2: Setup SSH Key for EC2
       - name: Setup SSH Key
