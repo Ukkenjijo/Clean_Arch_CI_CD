@@ -1,0 +1,62 @@
+name: CI/CD Pipeline for user-api
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the Repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Setup SSH Key for EC2
+      - name: Setup SSH Key
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" | base64 --decode > ec2-key.pem
+          chmod 400 ec2-key.pem
+
+      # Step 3: Connect to EC2 and Pull Latest Code
+      - name: Pull Latest Code from Git
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_IP: ${{ secrets.EC2_IP }}
+        run: |
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
+            cd /home/ubuntu/Clean_Arch_CI_CD
+            git pull origin main
+          '
+
+      # Step 4: Test and Build the Application
+      - name: Test and Build Application
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_IP: ${{ secrets.EC2_IP }}
+        run: |
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
+            cd /home/ubuntu/Clean_Arch_CI_CD
+            go mod tidy
+            go test ./... -v
+            go build -o app ./cmd/main.go
+          '
+
+      # Step 5: Restart the Application Service
+      - name: Restart Application Service
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_IP: ${{ secrets.EC2_IP }}
+        run: |
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
+            sudo systemctl restart user-api.service
+          '
+
+      # Step 6: Cleanup SSH Key
+      - name: Cleanup
+        run: |
+          rm -f ec2-key.pem
