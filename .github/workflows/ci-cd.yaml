@@ -43,7 +43,7 @@ jobs:
             cd /home/ubuntu/Clean_Arch_CI_CD
             go mod tidy
             go test ./... -v
-            go build -o app ./cmd/main.go
+            go build ./cmd/main.go
           '
 
       # Step 5: Restart the Application Service
