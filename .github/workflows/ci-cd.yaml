@@ -47,6 +47,7 @@ jobs:
           EC2_IP: ${{ secrets.EC2_IP }}
         run: |
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
+            export PATH=$PATH:/usr/local/go/bin
             set -e
             cd /home/ubuntu/Clean_Arch_CI_CD
             go mod tidy
@@ -60,6 +61,7 @@ jobs:
           EC2_IP: ${{ secrets.EC2_IP }}
         run: |
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
+            export PATH=$PATH:/usr/local/go/bin
             set -e
             cd /home/ubuntu/Clean_Arch_CI_CD
             go build ./cmd/main.go
