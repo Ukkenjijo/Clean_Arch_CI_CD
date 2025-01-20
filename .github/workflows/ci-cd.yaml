@@ -72,6 +72,7 @@ jobs:
           EC2_IP: ${{ secrets.EC2_IP }}
         run: |
           ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_IP '
+            export PATH=$PATH:/usr/local/go/bin
             set -e
             sudo systemctl restart user-api.service
             sudo systemctl status user-api.service --no-pager
